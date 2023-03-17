@@ -1,5 +1,7 @@
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
+import { Confirm } from 'notiflix/build/notiflix-confirm-aio';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 const startTimerBtn = document.querySelector('button[data-start]');
 const daysEl = document.querySelector('.value[data-days]');
@@ -7,10 +9,12 @@ const hoursEl = document.querySelector('.value[data-hours]');
 const minutesEl = document.querySelector('.value[data-minutes]');
 const secondsEl = document.querySelector('.value[data-seconds]');
 
-
 startTimerBtn.setAttribute('disabled', '');
-const startTime = Date.now();
+startTimerBtn.addEventListener('click', onStartBtnClick);
 
+let isActive = false;
+let timerId = null;
+let choosedDate = null;
 
 const options = {
     enableTime: true,
@@ -25,34 +29,50 @@ const options = {
 
 flatpickr("#datetime-picker", options);
 
-
-
-
 function validationDate(selectedDates) {
-    const choosedDate = selectedDates.getTime();
+    choosedDate = selectedDates.getTime();
 
     if (choosedDate <= Date.now()) {
         startTimerBtn.setAttribute('disabled', '');
-        window.alert("Plsease choose a date in future");
+
+        Confirm.show(
+        'Invalid Date For Timer',
+        'Plsease choose a date in future',
+        'OK');
     };
 
     if (choosedDate > Date.now()) {
         startTimerBtn.removeAttribute('disabled');
     };
-}
-
-startTimerBtn.addEventListener('click', onStartBtnClick);
+};
 
 
 function onStartBtnClick() {
 
-    setInterval(() => { 
-        const currentTime = Date.now();
-        const differenceTime = currentTime - startTime;
-        const convertedTime = convertMs(differenceTime);
-        console.log(convertedTime);
-    }, 1000);
-    
+    if (isActive === true) {
+        return;
+    };
+    isActive = true;
+
+    timerId = setInterval(startTimer, 1000);
+};
+
+function startTimer() {
+    const differenceTime = choosedDate - Date.now();
+    const convertedTime = convertMs(differenceTime);
+    renderingTimer(convertedTime);
+    if (differenceTime < 1000) {
+        Notify.success('Time is end!');
+        clearInterval(timerId);
+    };
+};
+
+
+function renderingTimer({ days, hours, minutes, seconds }) {
+    daysEl.textContent = addLeadingZero(days);
+    hoursEl.textContent = addLeadingZero(hours);
+    minutesEl.textContent = addLeadingZero(minutes);
+    secondsEl.textContent = addLeadingZero(seconds);
 };
 
 
