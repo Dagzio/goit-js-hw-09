@@ -26,7 +26,8 @@ function createPromise(position, delay) {
 function onSubmitForm(event) {
   event.preventDefault();
   let delayValue = Number(formEl.delay.value);
-  for (let i = 0; i <= formEl.amount.value; i += 1){
+  
+  for (let i = 1; i <= formEl.amount.value; i += 1){
     createPromise(i, delayValue)
       .then(({ position, delay }) => {
     Notify.success(`Fulfilled promise ${position} in ${delay}ms`);
